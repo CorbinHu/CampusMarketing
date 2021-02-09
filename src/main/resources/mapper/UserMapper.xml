@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.corbinhu.campusmarketing.mapper.UserMapper">
+
+  <sql id="insertFields">
+    role_id, login_name, user_name, telephone, password, salt, status, province, city, create_by, create_time,
+    update_by, update_time, remark, campus_name
+  </sql>
+
+  <sql id="selectFields">
+    id, role_id, login_name, user_name, telephone, password, salt, status, province, city, create_by, create_time,
+    update_by, update_time, remark, campus_name
+  </sql>
+
+  <select id="selectUserList" parameterType="User" resultType="User">
+    select
+    <include refid="selectFields"/>
+    from sys_user
+    where 1 = 1
+    <if test="loginName != null and loginName != ''">
+      and login_name like concat('%', #{loginName}, '%')
+    </if>
+    <if test="telephone != null and telephone != ''">
+      and telephone like concat('%', #{telephone}, '%')
+    </if>
+    <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+      and date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+    </if>
+    <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+      and date_format(create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+    </if>
+    <!-- 数据范围过滤 -->
+    ${params.dataScope}
+  </select>
+
+  <select id="selectUserCount" resultType="int">
+    select count(id) from sys_user where status = '0';
+  </select>
+
+  <select id="selectById" resultType="User">
+    select
+    <include refid="selectFields"/>
+    from sys_user
+    where id = #{id}
+  </select>
+
+  <select id="selectByLoginName" resultType="User">
+    select
+    <include refid="selectFields"/>
+    from sys_user
+    where login_name = #{loginName}
+  </select>
+
+  <select id="selectByTelephone" resultType="User">
+    select
+    <include refid="selectFields"/>
+    from sys_user
+    where telephone = #{telephone}
+  </select>
+
+  <insert id="insertUser" parameterType="User" keyProperty="id">
+    insert into sys_user (<include refid="insertFields"/>)
+    values(#{roleId}, #{loginName}, #{userName}, #{telephone}, #{password}, #{salt}, #{status}, #{province}, #{city},
+    #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{remark}, #{campusName})
+  </insert>
+
+  <update id="updatePassword">
+    update sys_user set password = #{password} where id = #{id}
+  </update>
+
+  <delete id="deleteUserById">
+    delete from sys_user where id = #{id}
+  </delete>
+
+  <update id="updateUser" parameterType="User">
+    update sys_user
+    <set>
+      <if test="roleId != null and roleId != 0">role_id = #{roleId},</if>
+      <if test="loginName != null and loginName != ''">login_name = #{loginName},</if>
+      <if test="userName != null and userName != ''">user_name = #{userName},</if>
+      <if test="telephone != null and telephone != ''">telephone = #{telephone},</if>
+      <if test="password != null and password != ''">password = #{password},</if>
+      <if test="salt != null and salt != ''">salt = #{salt},</if>
+      <if test="status != null and status != ''">status = #{status},</if>
+      <if test="province != null and province != ''">province = #{province},</if>
+      <if test="city != null and city != ''">city = #{city},</if>
+      <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+      <if test="remark != null">remark = #{remark},</if>
+      <if test="campusName != null and campusName !=''">campus_name = #{campusName},</if>
+      update_time = sysdate()
+    </set>
+    where id = #{id}
+  </update>
+</mapper>

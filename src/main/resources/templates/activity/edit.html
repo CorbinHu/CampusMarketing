@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('修改营销活动')" />
+	<th:block th:include="include :: select2-css" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body>
+    <div class="main-content">
+        <form class="form-horizontal" id="form-activity-add" th:object="${activity}">
+            <input name="id"  type="hidden"  th:field="*{id}" />
+            <h4 class="form-header h4">基本信息</h4>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">活动名称：</label>
+                        <div class="col-sm-8">
+                            <input id="name" name="name" placeholder="请输入活动名称" th:value="*{name}" class="form-control" type="text" maxlength="30" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">放号目标：</label>
+                        <div class="col-sm-8">
+                            <input id="targetNums" name="targetNums" placeholder="请输入放号目标" th:value="*{targetNums}" class="form-control" type="text" maxlength="11" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label is-required">活动内容：</label>
+                        <div class="col-xs-10">
+                            <textarea id="content" name="content" maxlength="500" placeholder="请输入活动内容" class="form-control" rows="3">[[*{content}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">开始时间：</label>
+                        <div class="col-sm-8 controls input-append date form_datetime" data-date="2021-01-01T00:00:00Z" data-link-field="dtp_input1">
+                            <input id="beginTime" name="beginTime" placeholder="请输入开始时间" size="20" type="text" th:value="*{#dates.format(beginTime, 'yyyy-MM-dd HH:mm:ss')}" readonly>
+                            <span class="add-on"><i class="icon-remove"></i></span>
+                            <span class="add-on"><i class="icon-th"></i></span>
+                        </div>
+                        <input type="hidden" id="dtp_input1" value="" /><br/>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">结束时间：</label>
+                        <div class="col-sm-8 controls input-append date form_datetime" data-date="2021-01-01T00:00:00Z"  data-link-field="dtp_input2">
+                            <input id="endTime" name="endTime" placeholder="请输入结束时间" size="20" type="text" th:value="*{#dates.format(endTime, 'yyyy-MM-dd HH:mm:ss')}" readonly>
+                            <span class="add-on"><i class="icon-remove"></i></span>
+                            <span class="add-on"><i class="icon-th"></i></span>
+                        </div>
+                        <input type="hidden" id="dtp_input2" value="" /><br/>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label is-required">地市：</label>
+                        <div class="col-sm-8">
+                            <input id="city" name="city" th:value="*{city}" class="form-control" type="text" placeholder="请指定地市完成" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h4 class="form-header h4">其他信息</h4>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-xs-2 control-label">备注：</label>
+                        <div class="col-xs-10">
+                            <textarea id="remark" name="remark" maxlength="500" class="form-control" rows="3">[[*{remark}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-10">
+            <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存</button>&nbsp;
+            <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭 </button>
+        </div>
+    </div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: select2-js" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <th:block th:include="include :: datetimepicker-zh-CN-js" />
+
+	<script type="text/javascript">
+        var prefix = ctx + "/activity";
+        $('.form_datetime').datetimepicker({
+            language : 'zh-CN',
+            format : 'yyyy-mm-dd hh:ii:00',//日期格式。可以将日期格式，定成年月日时，分,秒为0。
+            weekStart: 1,
+            todayBtn:  1,
+            autoclose: 1,
+            todayHighlight: 1,
+            startView: 2,
+            forceParse: 0,
+            showMeridian: 1
+        });
+        
+        function submitHandler() {
+	        if ($.validate.form()) {
+	        	var data = $("#form-activity-add").serializeArray();
+	        	$.operate.saveTab(prefix + "/edit", data);
+	        }
+	    }
+    </script>
+</body>
+</html>

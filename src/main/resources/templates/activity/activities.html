@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('营销活动列表')"/>
+    <th:block th:include="include :: layout-latest-css"/>
+    <th:block th:include="include :: ztree-css"/>
+</head>
+<body class="gray-bg">
+
+<div class="ui-layout-center">
+    <input id="roleId" type="hidden" th:value="${user.roleId}">
+    <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="user-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                活动名称：<input type="text" name="name"/>
+                            </li>
+                            <li class="select-time">
+                                <label>创建时间： </label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                       name="params[beginTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                       name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" th:if="${user.roleId==1||user.roleId==2}">
+                <a class="btn btn-success" onclick="$.operate.addTab()">
+                    <i class="fa fa-plus"></i> 新增
+                </a>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: layout-latest-js"/>
+<th:block th:include="include :: ztree-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "activity";
+    var roleId = $('#roleId').val();
+    var editFlag = roleId === "1" || roleId === "2"
+    var removeFlag = roleId === "1" || roleId === "2"
+    var lookFlag = roleId === "1" || roleId === "2" || roleId === "3";
+    var acceptFlag = roleId === "3";
+    $(function () {
+        var panehHidden = false;
+        if ($(this).width() < 769) {
+            panehHidden = true;
+        }
+        $('body').layout({initClosed: panehHidden, west__size: 185});
+        queryUserList();
+    });
+
+    function queryUserList() {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            acceptUrl: prefix + "/acceptActivity",
+            sortName: "createTime",
+            sortOrder: "desc",
+            modalName: "营销活动",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '活动ID'
+                },
+                {
+                    field: 'name',
+                    title: '活动名称',
+                    sortable: true
+                },
+                {
+                    field: 'targetNums',
+                    title: '放号目标'
+                },
+                {
+                    field: 'city',
+                    title: '地市',
+                },
+                {
+                    field: 'statusName',
+                    title: '活动状态',
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateTime',
+                    title: '更新时间',
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (editFlag)
+                            actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        if (removeFlag)
+                            actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+                        if (lookFlag)
+                            actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="activity_details(\'' + row.id + '\')"><i class="fa fa-search"></i>详情</a> ');
+                        if (acceptFlag) {
+                            actions.push(`<button class="btn btn-success btn-xs" ${row.status!=0?'disabled':''} onclick="$.operate.accept('${row.id}')"><i class="fa fa-check"></i>接受</button> `);
+                        }
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    }
+
+
+
+    $('#btnExpand').click(function () {
+        $._tree.expandAll(true);
+        $(this).hide();
+        $('#btnCollapse').show();
+    });
+
+    $('#btnCollapse').click(function () {
+        $._tree.expandAll(false);
+        $(this).hide();
+        $('#btnExpand').show();
+    });
+
+    /* 活动详情 */
+    function activity_details(id) {
+        var url = prefix + '/details/' + id;
+        $.modal.open("营销活动详情", url, '770', '380');
+    }
+
+</script>
+</body>
+<!-- 导入区域 -->
+<script id="importTpl" type="text/template">
+    <form enctype="multipart/form-data" class="mt20 mb10">
+        <div class="col-xs-offset-1">
+            <input type="file" id="file" name="file"/>
+            <div class="mt10 pt5">
+                <input type="checkbox" id="updateSupport" name="updateSupport" title="如果登录账户已经存在，更新这条数据。"> 是否更新已经存在的用户数据
+                &nbsp; <a onclick="$.table.importTemplate()" class="btn btn-default btn-xs"><i
+                    class="fa fa-file-excel-o"></i> 下载模板</a>
+            </div>
+            <font color="red" class="pull-left mt10">
+                提示：仅允许导入“xls”或“xlsx”格式文件！
+            </font>
+        </div>
+    </form>
+</script>
+</html>

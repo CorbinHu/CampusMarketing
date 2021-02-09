@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计</title>
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="../static/css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link href="../static/css/font-awesome.min.css" th:href="@{/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link href="../static/css/main/animate.min.css" th:href="@{/css/main/animate.min.css}" rel="stylesheet"/>
+    <link href="../static/css/main/style.min862f.css" th:href="@{/css/main/style.min862f.css}" rel="stylesheet"/>
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content">
+    <div>
+        <span>[[${user.loginName}]]，欢迎您系统</span>
+    </div>
+    <div class="current-time">
+        当前时间为:
+        <span></span>年
+        <span></span>月
+        <span></span>日
+        <span></span>时
+        <span></span>分
+        <span></span>秒
+    </div>
+</div>
+</body>
+<script th:src="@{/js/jquery.min.js}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        function time() {
+            var date = new Date();
+            var n = date.getFullYear();
+            var y = date.getMonth() + 1;
+            var t = date.getDate();
+            var h = date.getHours();
+            var m = date.getMinutes();
+            var s = date.getSeconds();
+
+            $('.current-time span').eq(0).html(n);
+            $('.current-time span').eq(1).html(y);
+            $('.current-time span').eq(2).html(t);
+            $('.current-time span').eq(3).html(h);
+            $('.current-time span').eq(4).html(m);
+            $('.current-time span').eq(5).html(s);
+            for (var i = 0; i < $('div').length; i++) {
+                if ($('div').eq(i).text().length == 1) {
+                    $('div').eq(i).html(function (index, html) {
+                        return 0 + html;
+                    });
+                }
+            }
+        }
+
+        time();
+        setInterval(time, 1000);
+    });
+</script>
+</html>

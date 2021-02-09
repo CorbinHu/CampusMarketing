@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.corbinhu.campusmarketing.mapper.ActivityMapper">
+
+  <sql id="insertFields">
+    name, content, target_nums, status, city, begin_time, end_time, create_by, create_time, update_by, update_time, accept_name, accept_time, remark
+  </sql>
+
+  <sql id="selectFields">
+    id, name, content, target_nums, status, city, begin_time, end_time, create_by, create_time, update_by, update_time, accept_name, accept_time, remark
+  </sql>
+
+  <select id="selectActivityList" parameterType="Activity" resultType="Activity">
+    select <include refid="selectFields"/>
+    from tbl_activities
+    where 1 = 1
+    <if test="name != null and name != ''">
+      and name like concat('%', #{name}, '%')
+    </if>
+    <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+      and date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+    </if>
+    <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+      and date_format(create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+    </if>
+    <!-- 数据范围过滤 -->
+    ${params.dataScope}
+  </select>
+
+  <select id="selectActivityCount" resultType="int">
+    select count(id) from tbl_activities where status != '2';
+  </select>
+
+  <select id="selectActivityById" resultType="Activity">
+    select <include refid="selectFields"/>
+    from tbl_activities
+    where id = #{id}
+  </select>
+
+  <select id="selectByActivityName" resultType="Activity">
+    select <include refid="selectFields"/>
+    from tbl_activities
+    where name = #{name}
+  </select>
+
+  <insert id="insertActivity" parameterType="Activity" keyProperty="id">
+    insert into tbl_activities (<include refid="insertFields"/>)
+    values(#{name}, #{content}, #{targetNums}, #{status}, #{city}, #{beginTime}, #{endTime},#{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{acceptName}, #{acceptTime}, #{remark})
+  </insert>
+
+  <delete id="deleteActivityById">
+    delete from tbl_activities where id = #{id}
+  </delete>
+
+  <update id="updateActivity" parameterType="Activity">
+    update tbl_activities
+    <set>
+      <if test="name != null and name != ''">name = #{name},</if>
+      <if test="content != null and content != ''">content = #{content},</if>
+      <if test="targetNums != null and targetNums != 0">target_nums = #{targetNums},</if>
+      <if test="status != null and status != ''">status = #{status},</if>
+      <if test="city != null and city != ''">city = #{city},</if>
+      <if test="beginTime != null">begin_time = #{beginTime},</if>
+      <if test="endTime != null">end_time = #{endTime},</if>
+      <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+      <if test="acceptName != null and acceptName != ''">accept_name = #{acceptName},</if>
+      <if test="acceptTime != null">accept_time = #{acceptTime},</if>
+      <if test="remark != null">remark = #{remark},</if>
+      update_time = sysdate()
+    </set>
+    where id = #{id}
+  </update>
+</mapper>

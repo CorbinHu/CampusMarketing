@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('用户列表')"/>
+    <th:block th:include="include :: layout-latest-css"/>
+    <th:block th:include="include :: ztree-css"/>
+</head>
+<body class="gray-bg">
+
+<div class="ui-layout-center">
+    <input type="hidden" id="roleId" th:value="${user.roleId}">
+    <input type="hidden" id="userId" th:value="${user.id}">
+    <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="user-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                登录名称：<input type="text" name="loginName"/>
+                            </li>
+                            <li>
+                                手机号码：<input type="text" name="telephone"/>
+                            </li>
+                            <li class="select-time">
+                                <label>创建时间： </label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间"
+                                       name="params[beginTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间"
+                                       name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                        class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                        class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.addTab()">
+                    <i class="fa fa-plus"></i> 新增
+                </a>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: layout-latest-js"/>
+<th:block th:include="include :: ztree-js"/>
+<script th:inline="javascript">
+    var prefix = ctx + "user";
+    var roleId = $("#roleId").val();
+    var userId = $("#userId").val();
+
+    $(function () {
+        var panehHidden = false;
+        if ($(this).width() < 769) {
+            panehHidden = true;
+        }
+        $('body').layout({initClosed: panehHidden, west__size: 185});
+        queryUserList();
+    });
+
+    function queryUserList() {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            sortName: "createTime",
+            sortOrder: "desc",
+            modalName: "用户",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: '用户ID'
+                },
+                {
+                    field: 'loginName',
+                    title: '登录名称',
+                    sortable: true
+                },
+                {
+                    field: 'userName',
+                    title: '用户名称'
+                },
+                {
+                    field: 'roleName',
+                    title: '角色名称'
+                },
+                {
+                    field: 'province',
+                    title: '省份',
+                },
+                {
+                    field: 'city',
+                    title: '城市',
+                },
+                {
+                    field: 'telephone',
+                    title: '手机'
+                },
+                {
+                    field: 'campusName',
+                    title: '校园名称'
+                },
+                {
+                    field: 'status',
+                    title: '用户状态',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return statusTools(row);
+                    }
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true
+                },
+                {
+                    field: 'updateTime',
+                    title: '更新时间',
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + '" href="javascript:void(0)" onclick="$.operate.editTab(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    }
+
+    $('#btnExpand').click(function () {
+        $._tree.expandAll(true);
+        $(this).hide();
+        $('#btnCollapse').show();
+    });
+
+    $('#btnCollapse').click(function () {
+        $._tree.expandAll(false);
+        $(this).hide();
+        $('#btnExpand').show();
+    });
+
+    /* 用户管理-重置密码 */
+    function resetPwd(userId) {
+        var url = prefix + '/resetPwd/' + userId;
+        $.modal.open("重置密码", url, '800', '300');
+    }
+
+    /* 用户状态显示 */
+    function statusTools(row) {
+        if (row.status === '1') {
+            return '<i class=\"fa fa-toggle-off text-info fa-2x\" onclick="enable(\'' + row.id + '\')"></i> ';
+        } else {
+            return '<i class=\"fa fa-toggle-on text-info fa-2x\" onclick="disable(\'' + row.id + '\')"></i> ';
+        }
+    }
+
+    /* 用户管理-停用 */
+    function disable(userId) {
+        $.modal.confirm("确认要停用用户吗？", function () {
+            $.operate.post(prefix + "/changeStatus", {"id": userId, "status": 1});
+        })
+    }
+
+    /* 用户管理启用 */
+    function enable(userId) {
+        $.modal.confirm("确认要启用用户吗？", function () {
+            $.operate.post(prefix + "/changeStatus", {"id": userId, "status": 0});
+        })
+    }
+</script>
+</body>
+</html>
