@@ -3,30 +3,6 @@ CREATE
 
 USE market_system_db;
 
-
-# 公司表
-DROP TABLE IF EXISTS `tbl_firm`;
-CREATE TABLE `tbl_firm`
-(
-    `id`      INT(20)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `name`    VARCHAR(100) NOT NULL,
-    `address` VARCHAR(100) NOT NULL
-) ENGINE = INNODB
-  DEFAULT CHARSET = utf8 COMMENT ='公司信息表';
-
-TRUNCATE TABLE tbl_firm;
-
-SELECT *
-FROM tbl_firm;
-
-INSERT INTO `tbl_firm`(`id`, `name`, `address`)
-VALUES (1, '中国联通集团', '北京市大兴区亦庄文化园'),
-       (2, '中国联通湖北省分公司', '湖北省武汉市江汉区'),
-       (3, '中国联通陕西省分公司', '陕西省西安市雁塔区'),
-       (4, '中国联通武汉市分公司', '湖北省武汉市汉口火车站'),
-       (5, '中国联通黄石市分公司', '湖北省黄石市黄石港区');
-
-
 #角色表
 DROP TABLE IF EXISTS `sys_role`;
 CREATE TABLE `sys_role`
@@ -109,5 +85,4 @@ CREATE TABLE `tbl_activities`
 
 
 
-DROP
-    DATABASE market_system_db;
+DROP DATABASE market_system_db;
